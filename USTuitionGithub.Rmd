@@ -1,0 +1,47 @@
+---
+title: "US Tuition GitHub First Try"
+author: "Ayo"
+date: "24 4 2022"
+output: html_document
+---
+**Part 1 Data Wrangling**
+```{r}
+library(rio)
+library(tidyverse)
+library(janitor)
+library(scales)
+
+# I imported the excel file from my computer. The source file is also importable from TidyTuesday's GitHub repo
+
+TuitionUS <- import("us_avg_tuition.xlsx")
+
+
+# To obtain the national average each year
+
+TuitionUS<-TuitionUS %>% add_row(State ='USA',
+                summarise(., across(where(is.numeric),mean)))
+
+# Average over time
+
+TuitionUS <-mutate(TuitionUS, Average=rowMeans(select(TuitionUS, c(2:13)), na.rm=TRUE))
+
+```
+
+
+**Part 2 Visualisation**
+```{r}
+ggplot(data = TuitionUS)+
+  geom_bar(mapping = aes(x=reorder (State, Average),y= Average), stat = 'identity', colour="white", fill="#1b98e0")+
+  coord_flip()+
+  scale_y_continuous(labels=scales::dollar_format())+
+  ggtitle('Average Tuition Fees for In-State Tuition for Public Universities in the USA from 2004-2015')+
+  ylab('Average Tuition in Dollars')+
+  xlab('State')+
+  theme_minimal()+
+  geom_text(aes(x=State,y= Average, label= dollar(round(Average,digits = 0)), hjust=-0.2, fontface="bold"))+
+  labs(caption = 'Source=TidyTuesdayGithub&onlinembapage.com')
+
+# USA should be emphasised with a different colour, but I cannot seem to get around it.
+
+```
+
